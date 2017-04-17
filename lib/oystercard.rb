@@ -10,4 +10,8 @@ class Oystercard
     fail "Top-up would exceed £#{DEFAULT_LIMIT} limit" if @balance + amount > DEFAULT_LIMIT
     @balance += amount
   end
+
+  def spend(amount)
+    @balance -= amount
+  end
 end
