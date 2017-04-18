@@ -22,10 +22,10 @@ describe Oystercard do
 
   end
 
-  describe '#spend' do
+  describe '#deduct' do
     it "reduces balance by given amount" do
       subject.top_up(50)
-      expect(subject.spend(40)).to eq 10
+      expect(subject.send(:deduct,40)).to eq 10
     end
   end
 
@@ -52,6 +52,10 @@ end
       subject.touch_out
       expect(subject.in_journey?).to eq false
     end
+
+    it 'deducts fare upon touching out' do
+    expect {subject.touch_out}.to change{subject.balance}.by(-Oystercard::MINIMUM_BALANCE)
+   end
   end
 
 
