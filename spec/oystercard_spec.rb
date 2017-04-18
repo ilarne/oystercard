@@ -13,6 +13,13 @@ describe Oystercard do
 
   it { is_expected.to respond_to(:entry_station) }
 
+  it 'stores entry and exit stations in a hash' do
+    subject.top_up(3)
+    subject.touch_in(station)
+    subject.touch_out(station)
+    expect(subject.journey).to eq ({journey: [station,station]})
+  end
+
   describe '#top_up' do
     it 'tops up balance by specified amount' do
       subject.top_up(15)
