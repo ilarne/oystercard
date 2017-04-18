@@ -1,12 +1,12 @@
 class Oystercard
 
-  attr_reader :balance, :in_use
+  attr_reader :balance, :in_use, :entry_station
   DEFAULT_LIMIT = 90
   MINIMUM_BALANCE = 1
 
   def initialize
     @balance = 0
-    @in_use = false
+    @entry_station
   end
 
   def top_up(amount)
@@ -15,17 +15,19 @@ class Oystercard
   end
 
   def in_journey?
-  @in_use
+  @entry_station.nil? ? false : true
   end
 
-  def touch_in
+  def touch_in(station)
    fail "insufficient funds !" if @balance < MINIMUM_BALANCE
    @in_use = true
+   @entry_station = station
   end
 
   def touch_out
    @in_use = false
    deduct(MINIMUM_BALANCE)
+   @entry_station = nil
   end
 
 private

@@ -1,6 +1,7 @@
 require 'oystercard'
 
 describe Oystercard do
+  let (:station){double(:station)}
 
   it { is_expected.to respond_to(:balance) }
 
@@ -9,6 +10,8 @@ describe Oystercard do
   end
 
   it { is_expected.to respond_to(:top_up).with(1).argument }
+
+  it { is_expected.to respond_to(:entry_station) }
 
   describe '#top_up' do
     it 'tops up balance by specified amount' do
@@ -38,14 +41,20 @@ describe Oystercard do
   describe '#touch_in' do
     it 'makes in journey status true' do
       subject.top_up(3)
-      subject.touch_in
+      subject.touch_in(station)
       expect(subject.in_journey?).to eq true
     end
 
-  it "raises and error if balance is less than minimum charge" do
-  expect {subject.touch_in}.to raise_error "insufficient funds !"
+    it 'remembers entry station' do
+      subject.top_up(3)
+      subject.touch_in(station)
+      expect(subject.entry_station).to eq station
+    end
+
+    it "raises and error if balance is less than minimum charge" do
+      expect {subject.touch_in(station)}.to raise_error "insufficient funds !"
+    end
   end
-end
 
   describe '#touch_out' do
     it 'makes in journey status false' do
@@ -54,8 +63,14 @@ end
     end
 
     it 'deducts fare upon touching out' do
-    expect {subject.touch_out}.to change{subject.balance}.by(-Oystercard::MINIMUM_BALANCE)
-   end
+      expect {subject.touch_out}.to change{subject.balance}.by(-Oystercard::MINIMUM_BALANCE)
+    end
+
+    it 'sets entry station to nil' do
+      subject.top_up(3)
+      subject.touch_in(station)
+      expect(subject.touch_out).to eq nil
+    end
   end
 
 
