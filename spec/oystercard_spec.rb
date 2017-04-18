@@ -26,7 +26,26 @@ describe Oystercard do
     it "reduces balance by given amount" do
       subject.top_up(50)
       expect(subject.spend(40)).to eq 10
+    end
+  end
 
+  describe '#in_journey?' do
+    it 'expect journey to be false to begin with' do
+      expect(subject.in_journey?).to be(false)
+    end
+  end
+
+  describe '#touch_in' do
+    it 'makes in journey status true' do
+      subject.touch_in
+      expect(subject.in_journey?).to eq true
+    end
+  end
+
+  describe '#touch_out' do
+    it 'makes in journey status false' do
+      subject.touch_out
+      expect(subject.in_journey?).to eq false
     end
   end
 
