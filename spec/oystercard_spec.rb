@@ -1,7 +1,7 @@
 require 'oystercard'
 
 describe Oystercard do
-  let (:station){double(:station)}
+  let (:station){ double(:station) }
 
   it { is_expected.to respond_to(:balance) }
 
@@ -9,16 +9,13 @@ describe Oystercard do
     expect(subject.balance).to eq 0
   end
 
+  it 'checks card has empty journey history by default' do
+    expect(subject.journey_history).to eq []
+  end
+
   it { is_expected.to respond_to(:top_up).with(1).argument }
 
   it { is_expected.to respond_to(:entry_station) }
-
-  it 'stores entry and exit stations in a hash' do
-    subject.top_up(3)
-    subject.touch_in(station)
-    subject.touch_out(station)
-    expect(subject.journey).to eq ({journey: [station,station]})
-  end
 
   describe '#top_up' do
     it 'tops up balance by specified amount' do
@@ -29,13 +26,12 @@ describe Oystercard do
     it 'raises an error if top-up would push balance above £90' do
       expect{ subject.top_up(100) }.to raise_error "Top-up would exceed £#{Oystercard::DEFAULT_LIMIT} limit"
     end
-
   end
 
   describe '#deduct' do
-    it "reduces balance by given amount" do
+    it 'reduces balance by given amount' do
       subject.top_up(50)
-      expect(subject.send(:deduct,40)).to eq 10
+      expect(subject.send(:deduct, 40)).to eq 10
     end
   end
 
@@ -58,8 +54,8 @@ describe Oystercard do
       expect(subject.entry_station).to eq station
     end
 
-    it "raises and error if balance is less than minimum charge" do
-      expect {subject.touch_in(station)}.to raise_error "insufficient funds !"
+    it 'raises and error if balance is less than minimum charge' do
+      expect { subject.touch_in(station) }.to raise_error 'Insufficient funds!'
     end
   end
 
@@ -70,7 +66,7 @@ describe Oystercard do
     end
 
     it 'deducts fare upon touching out' do
-      expect {subject.touch_out(station)}.to change{subject.balance}.by(-Oystercard::MINIMUM_BALANCE)
+      expect { subject.touch_out(station) }.to change{ subject.balance }.by(-Oystercard::MINIMUM_BALANCE)
     end
 
     it 'sets entry station to nil' do
@@ -83,6 +79,13 @@ describe Oystercard do
     it 'creates an exit station on touch out' do
       subject.touch_out(station)
       expect(subject.exit_station).to eq station
+    end
+
+    it 'saves to journey history upon touching out' do
+      subject.top_up(Oystercard::MINIMUM_BALANCE)
+      subject.touch_in(station)
+      subject.touch_out(station)
+      expect(subject.journey_history).to eq ( [ { entry_station: station, exit_station: station } ])
     end
   end
 end
