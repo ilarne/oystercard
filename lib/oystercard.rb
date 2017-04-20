@@ -14,7 +14,7 @@ class Oystercard #understands information about card balance
   end
 
   def in_journey?
-    @entry_station.nil? ? false : true
+    !!@entry_station #@entry_station.nil? ? false : true
   end
 
   def touch_in(station)
