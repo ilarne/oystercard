@@ -1,4 +1,5 @@
 require 'oystercard'
+require 'journey'
 
 describe Oystercard do
   let (:station){ double(:station) }
@@ -22,7 +23,7 @@ describe Oystercard do
   it 'charges a penalty fare for not touching out' do
     card.top_up(10)
     card.touch_in(station)
-    expect { card.touch_in(station) }.to change { card.balance }.by(-Oystercard::PENALTY_FARE)
+    expect { card.touch_in(station) }.to change { card.balance }.by(-Journey::PENALTY_FARE)
   end
 
   it { is_expected.to respond_to(:top_up).with(1).argument }
@@ -45,21 +46,10 @@ describe Oystercard do
     end
   end
 
-  describe '#in_journey?' do
-    it 'expect journey to be false to begin with' do
-      expect(card.in_journey?).to be(false)
-    end
-  end
-
   describe '#touch_in' do
     before do
       allow(station).to receive_messages(:name => "Camden", :zone => 3 )
       allow(journey).to receive_messages(:entry_station_name => "Camden")
-    end
-    it 'makes in journey status true' do
-      card.top_up(3)
-      card.touch_in(station)
-      expect(card.in_journey?).to eq true
     end
 
     it 'raises and error if balance is less than minimum charge' do
@@ -68,7 +58,7 @@ describe Oystercard do
 
     it 'creates a new instance of journey' do
       card.top_up(3)
-      card.touch_in(station)
+      card.touch_in('Camden')
       expect(card.journey.entry_station_name).to eq journey.entry_station_name
     end
   end
@@ -78,24 +68,21 @@ describe Oystercard do
       allow(station).to receive_messages(:name => "Dalston", :zone => 5)
       allow(journey).to receive_messages(:exit_station_name => "Dalston")
     end
-    it 'makes in journey status false' do
-      card.touch_out(station)
-      expect(card.in_journey?).to eq false
-    end
 
-    it 'deducts fare upon touching out' do
-      expect { card.touch_out(station) }.to change{ card.balance }.by(-Oystercard::MINIMUM_BALANCE)
+
+    it 'deducts penalty fare upon touching out' do
+      expect { card.touch_out(station) }.to change{ card.balance }.by(-Journey::PENALTY_FARE)
     end
 
     it 'creates an exit station on touch out' do
       card.touch_out(station)
-      expect(card.journey.exit_station_name).to eq station.name
+      expect(card.journey.exit_station_name).to eq station
     end
 
     it 'saves to journey history upon touching out' do
       card.top_up(Oystercard::MINIMUM_BALANCE)
-      card.touch_in(station)
-      card.touch_out(station)
+      card.touch_in('Dalston')
+      card.touch_out('Dalston')
       expect(card.journey_history).to eq ( [ { entry_station: station.name, exit_station: station.name } ])
     end
   end
